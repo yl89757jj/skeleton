@@ -1,7 +1,9 @@
 package api;
 
+import generated.tables.Receipts;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.ws.rs.POST;
 import java.math.BigDecimal;
 
 /**
@@ -17,4 +19,6 @@ public class CreateReceiptRequest {
     public String merchant;
 
     public BigDecimal amount;
+
+
 }

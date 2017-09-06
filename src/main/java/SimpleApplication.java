@@ -38,9 +38,13 @@ public class SimpleApplication extends Application<Configuration> {
         org.jooq.Configuration jooqConfig = setupJooq();
         ReceiptDao receiptDao = new ReceiptDao(jooqConfig);
 
+        // This configures Jersey to support sesions.
+        env.servlets().setSessionHandler(new SessionHandler());
+
         // Register all Controllers below.  Don't forget 
         // you need class and method @Path annotations!
         env.jersey().register(new HelloWorldController());
         env.jersey().register(new ReceiptController(receiptDao));
+
     }
 }
