@@ -29,7 +29,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tags extends TableImpl<TagsRecord> {
 
-	private static final long serialVersionUID = -1495754007;
+	private static final long serialVersionUID = 1570099053;
 
 	/**
 	 * The reference instance of <code>public.tags</code>
@@ -57,7 +57,7 @@ public class Tags extends TableImpl<TagsRecord> {
 	/**
 	 * The column <code>public.tags.rid</code>.
 	 */
-	public final TableField<TagsRecord, Integer> RID = createField("rid", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final TableField<TagsRecord, Integer> RID = createField("receipt_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
 	 * The column <code>public.tags.tag</code>.

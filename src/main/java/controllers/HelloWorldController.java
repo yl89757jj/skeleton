@@ -27,11 +27,6 @@ public class HelloWorldController {
         return "ly354" ;
      }
 
-    @PUT
-    @Path("/tags/{tag}")
-    public void toggleTag(@PathParam("tag") String tagName) {
-        // <your code here
-    }
 
      @POST
      @Path("/netid")
