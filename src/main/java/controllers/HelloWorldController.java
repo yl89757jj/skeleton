@@ -26,4 +26,16 @@ public class HelloWorldController {
      public String netid() {
         return "ly354" ;
      }
+
+    @PUT
+    @Path("/tags/{tag}")
+    public void toggleTag(@PathParam("tag") String tagName) {
+        // <your code here
+    }
+
+     @POST
+     @Path("/netid")
+    public String ListResipts(){
+        return null;
+     }
 }
