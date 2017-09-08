@@ -1,23 +1,21 @@
-# WARNING!  I am on a low-bandwidth internet connection and have not been able to build this
-# image myself yet.  Almost certainly it won't work, but the ideas are right
+# Use an official Python runtime as a parent image
+FROM python:2.7-slim
 
+# Set the working directory to /app
+WORKDIR /app
 
-# Use as are base image a linux with the java8 runtime already installed
-FROM openjdk:8
+# Copy the current directory contents into the container at /app
+ADD . /app
 
-# Add our application logic and ALL our dependencies into the docker image
-ADD build/distributions/skeleton.tar  /
+# Install any needed packages specified in requirements.txt
+RUN pip install -r requirements.txt
 
-# The .tar file that gradle builds includes everything in src/main, but we also need
-# our appconfig.yml (which is not part of the .tar that gradle builds) so we must
-# add it explicitly
-ADD appconfig.yml /skeleton/
+# Make port 80 available to the world outside this container
+EXPOSE 80
 
-# Convenience if we ever want to log into the image and snoop around
-WORKDIR /skeleton
+# Define environment variable
+ENV NAME World
 
-# The server is runs on 8080 inside the running container, so we need to expose that port
-EXPOSE 8080
+# Run app.py when the container launches
+CMD ["python", "app.py"]
 
-# When a new container is created, the server program should be run.
-ENTRYPOINT ["/skeleton/bin/skeleton", "server", "appconfig.yml"]

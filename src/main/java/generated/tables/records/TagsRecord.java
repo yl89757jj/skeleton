@@ -63,14 +63,14 @@ public class TagsRecord extends UpdatableRecordImpl<TagsRecord> implements Recor
     /**
      * Setter for <code>public.tags.rid</code>.
      */
-    public void setRid(Integer value) {
+    public void setReceiptId(Integer value) {
         setValue(2, value);
     }
 
     /**
      * Getter for <code>public.tags.rid</code>.
      */
-    public Integer getRid() {
+    public Integer getReceiptId() {
         return (Integer) getValue(2);
     }
 
@@ -173,7 +173,7 @@ public class TagsRecord extends UpdatableRecordImpl<TagsRecord> implements Recor
      */
     @Override
     public Integer value3() {
-        return getRid();
+        return getReceiptId();
     }
 
     /**
@@ -207,7 +207,7 @@ public class TagsRecord extends UpdatableRecordImpl<TagsRecord> implements Recor
      */
     @Override
     public TagsRecord value3(Integer value) {
-        setRid(value);
+        setReceiptId(value);
         return this;
     }
 
