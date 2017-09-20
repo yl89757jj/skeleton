@@ -1,92 +1,48 @@
 package dao;
 
+import generated.tables.Tags;
 import generated.tables.records.ReceiptsRecord;
 import generated.tables.records.TagsRecord;
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
-import org.jooq.Result;
 import org.jooq.impl.DSL;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkState;
 import static generated.Tables.RECEIPTS;
 import static generated.Tables.TAGS;
+import static com.google.common.base.Preconditions.checkState;
 
 public class TagDao {
     DSLContext dsl;
 
-    public TagDao(Configuration jooqConfig) {
+    public TagDao(Configuration jooqConfig){
         this.dsl = DSL.using(jooqConfig);
     }
 
-    public List<ReceiptsRecord> find(String tag) {
-
-        Result res = dsl.select(RECEIPTS.ID).from(RECEIPTS
-                .innerJoin(TAGS)
-                .on(RECEIPTS.ID.equal(TAGS.RID)))
-                .where(TAGS.TAG.equal(tag))
-                .fetch();
-
-        List<ReceiptsRecord> list = dsl
-                .selectFrom(RECEIPTS)
-                .where(RECEIPTS.ID.in(res))
-                .fetch();
-
-        return list;
-    }
-
-    public List<TagsRecord> getAllTags() {
-        return dsl.selectFrom(TAGS).fetch();
-    }
-
-    public String update(int rid, String tag) {
-
-
-        List<ReceiptsRecord> list = dsl
-                .selectFrom(RECEIPTS)
-                .where(RECEIPTS.ID.equal(rid))
-                .fetch();
-
-        if(list.isEmpty()) return "RID_NOT_EXIST";
-
-
-        //if rid exist, find tags
-        List<TagsRecord> lis = dsl
-                .selectFrom(TAGS)
-                .where(TAGS.RID.equal(rid))
-                .fetch();
-
-        //no tags associate with this rid
-        //insert directly
-        if(lis.isEmpty())  {
-            TagsRecord tagsRecord = dsl.insertInto(TAGS, TAGS.RID, TAGS.TAG)
-                    .values(rid, tag)
-                    .returning(TAGS.ID)
-                    .fetchOne();
-
-            checkState(tagsRecord != null && tagsRecord.getId() != null, "Insert failed");
-            return "Success";
+    public void handle(String tagName, int recordId){
+        TagsRecord currentTagsRecord = dsl.selectFrom(TAGS).where(TAGS.ID.eq(recordId)).and(TAGS.TAG.eq(tagName)).fetchOne();
+        if(currentTagsRecord == null){
+            // Insert new entry to the tags table
+            currentTagsRecord = dsl.insertInto(TAGS, TAGS.ID, TAGS.TAG).values(recordId, tagName)
+                    .returning(TAGS.TAGID).fetchOne();
+            checkState(currentTagsRecord != null
+                    && currentTagsRecord.getTagid() != null, "Insert failed");
+        }else{
+            // Untag/Remove the row from the tag table
+            currentTagsRecord.delete();
         }
 
-        //if there are tags, get tags
-        for(TagsRecord tr : lis) {
-            //if found the tag exist
-            if(tr.getTag().equals(tag)) {
-                //delete it (untag)
-                dsl.deleteFrom(TAGS).where(TAGS.TAG.equal(tag).and(TAGS.RID.equal(rid))).execute();
-                return "Delete";
-            }
-        }
-
-        //there are tags but not duplicate
-        TagsRecord tagsRecord = dsl.insertInto(TAGS, TAGS.RID, TAGS.TAG)
-                .values(rid, tag)
-                .returning(TAGS.ID)
-                .fetchOne();
-
-        checkState(tagsRecord != null && tagsRecord.getId() != null, "Insert failed");
-        return "Success";
     }
 
+
+    public List<ReceiptsRecord> getAllReceiptsWithGivenTag(String tagName){
+        // First obtain tag records where the tag column equals tagName
+        List<TagsRecord> tagsRecords = dsl.selectFrom(TAGS).where(TAGS.TAG.eq(tagName)).fetch();
+        List<ReceiptsRecord> receipts = new ArrayList<>();
+        for(TagsRecord record : tagsRecords){
+              receipts.add(dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.eq(record.getId())).fetchOne());
+        }
+        return receipts;
+    }
 }
