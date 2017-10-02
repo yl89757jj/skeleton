@@ -1,58 +1,52 @@
 package dao;
 
-import generated.tables.records.TagsRecord;
+import generated.tables.Receipts;
 import generated.tables.records.ReceiptsRecord;
+import generated.tables.records.TagsRecord;
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 
-import javax.validation.constraints.Null;
+import java.math.BigDecimal;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static generated.Tables.RECEIPTS;
 import static generated.Tables.TAGS;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 public class TagDao {
     DSLContext dsl;
+
     public TagDao(Configuration jooqConfig) {
         this.dsl = DSL.using(jooqConfig);
     }
 
-    //public int insert(int id, String tagName) {
-    //    TagsRecord tagsRecord = dsl
-    //            .insertInto(TAGS, TAGS.ID, TAGS.TAG)
-    //            .values(id, tagName)
-    //            .returning(TAGS.ID, TAGS.TAG)
-    //            .fetchOne();
-
-    //    checkState(tagsRecord != null && tagsRecord.getId() != null, "Insert failed");
-
-    //    return tagsRecord.getId();
-    //}
-
-//    public boolean isTaged(int id, String tagName) {
-//        TagsRecord tagsRecord = dsl.selectFrom(TAGS).where(TAGS.ID.eq(id)).and(TAGS.TAG.eq(tagName)).fetchOne();
-//        checkState(tagsRecord != null && tagsRecord.getId() != null, "IsTaged failed");
-//        return tagsRecord != null;
-//    }
-
-//    public void delete(int id, String tagName) {
-//        dsl.deleteFrom(TAGS).where(TAGS.ID.eq(id)).and(TAGS.TAG.eq(tagName)).execute();
-//    }
-    public void toggle(String tagName, int id) {
-        if (dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.eq(id)).fetchOne() != null) {
-            if (dsl.selectFrom(TAGS).where(TAGS.ID.eq(id).and(TAGS.TAG.eq(tagName))).fetchOne() == null) {
-                dsl.insertInto(TAGS).values(id, tagName).execute();
-            }
-            else {dsl.deleteFrom(TAGS).where(TAGS.ID.eq(id).and(TAGS.TAG.eq(tagName)));
+    public void insertTag(String tag, Integer id) {
+        if(verifyId(id).size() > 0) {
+            List<TagsRecord> tagsInfo = getTag(tag, id);
+            if (tagsInfo.size() > 0) {
+                delete(tag, id);
+            } else {
+                dsl.insertInto(TAGS, TAGS.ID, TAGS.NAME).values(id, tag).execute();
             }
         }
     }
 
-    public List<ReceiptsRecord> getAllReceipts(String tagName) {
-        return dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.in(dsl.select(TAGS.ID).from(TAGS).where(TAGS.TAG.eq(tagName)).fetch())).fetch();
+    public void delete(String tag, Integer id){
+        dsl.deleteFrom(TAGS).where(TAGS.ID.eq(id)).and(TAGS.NAME.eq(tag)).execute();
+    }
+
+    public List<TagsRecord> getTag(String tag, Integer id) {
+        return dsl.selectFrom(TAGS).where(TAGS.ID.eq(id)).and(TAGS.NAME.eq(tag)).fetch();
+    }
+
+    public List<ReceiptsRecord> getReceiptsWithTag(String tag){
+        return dsl.select(TAGS.ID,RECEIPTS.MERCHANT,RECEIPTS.AMOUNT, RECEIPTS.UPLOADED).from(TAGS).join(RECEIPTS).on(TAGS.ID.eq(RECEIPTS.ID)).where(TAGS.NAME.eq(tag)).fetchInto(ReceiptsRecord.class);
+    }
+
+    public ReceiptsRecord verifyId(Integer id){
+        return dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.eq(id)).fetchOne();
     }
 }

@@ -17,7 +17,6 @@ public class HelloWorldController {
     // to the @Path defined at the class level
     @GET
     @Path("/hello")
-    //public String helloWorld(@Session HttpSession session) { return "Hello World " + session.toString(); }
     public String helloWorld(@Session HttpSession session) {
         return "Hello World " + session.toString();
     }

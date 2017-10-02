@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS receipts;
+
 CREATE TABLE receipts (
   id INT UNSIGNED AUTO_INCREMENT,
   uploaded TIME DEFAULT CURRENT_TIME(),
@@ -8,10 +11,16 @@ CREATE TABLE receipts (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE tags(
-  tagId INT UNSIGNED AUTO_INCREMENT,
-  id INT UNSIGNED,
-  tag VARCHAR(255),
+CREATE TABLE tags (
+  id INT UNSIGNED AUTO_INCREMENT,
+  name VARCHAR(255),
 
-  PRIMARY KEY(tagId)
+  PRIMARY KEY (id)
 );
+
+CREATE TABLE receipts_tags (
+  id INT,
+  merchant VARCHAR(255),
+  amount DECIMAL(12,2),
+  name VARCHAR(255)
+)

@@ -1,95 +1,169 @@
 <!DOCTYPE html>
-<html>
-
 <head>
-    <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <style>
-        body {
+        #addReceipt {
+            border: none;
+            color: black;
             text-align: center;
+            display: inline-block;
+            margin: 4px 2px;
+            cursor: pointer;
+            padding: 2px 20px;
+            font-size: 32px;
         }
 
-        video {
-            width: 550px;
-            height: 450px;
-            border: 1px solid black;
+
+        .Button{
+            text-align: center;
+            margin: 4px 2px;
+            cursor: pointer;
+            padding: 5px 20px;
+        }
+        #receiptList{
+            border-style: solid;
+            border-width: 1px;
+            background: #1C6EA4;
+            background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            border-bottom: 0.5px solid #444444;
         }
 
-        #vidwrap {
-            margin: 20px 0;
-        }
 
-        #start, #snapshot {
-            height: 3em;
-        }
     </style>
-    <script>
-        let imageCapture;
-        let track;
-
-        function attachMediaStream(mediaStream) {
-            $('video')[0].srcObject = mediaStream;
-
-            // Saving the track allows us to capture a photo
-            track = mediaStream.getVideoTracks()[0];
-            imageCapture = new ImageCapture(track);
-        }
-
-        function startVideo() {
-            navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
-                .then(attachMediaStream)
-                .catch(error => {
-                    navigator.mediaDevices.getUserMedia({video: true})
-                        .then(attachMediaStream)
-                        .catch(error => {
-                            console.log('you are fooked');
-                        })
-                })
-        }
-
-        function takeSnapshot() {
-            // create a CANVAS element that is same size as the image
-            imageCapture.grabFrame()
-            .then(img => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                canvas.getContext('2d').drawImage(img, 0, 0);
-                const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
-                $.ajax({
-                    url: "/images",
-                    type: "POST",
-                    data: base64EncodedImageData,
-                    contentType: "text/plain",
-                    success: function() {},
-               })
-                .then(response => {
-                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
-                })
-                .always(() => console.log('request complete'));
-
-                // For debugging, you can uncomment this to see the frame that was captured
-                // $('BODY').append(canvas);
-            });
-
-        }
-
-
-        $(function () {
-            $('#start').on('click', startVideo);
-            $('video').on('play', () => $('#snapshot').prop('disabled', false));
-            $('#snapshot').on('click', takeSnapshot);
-        });
-    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 </head>
+<script>
 
+//    This is the idiomatic way to ensure that JQuery does not
+//    execute until the page has loaded
+    $(function () {
+        var id;
+        const api = ""; // <- do not need a root api URL if this page is served directly by the API
+        $.getJSON(api + "/receipts", function (receipts) {//get JSON array receipts
+            for (var i = 0; i < receipts.length; i++) {// show list
+                var receipt = receipts[i];
+                var newReceipt = "<div class='receipt' id = '" + receiptId + "'>";
+                newReceipt += "<span class='merchant'>" + receipt.merchant + "</span>";
+                newReceipt += "<span class='amount'>" + receipt.amount + "</span>";
+                newReceipt += "<span class='tags'><span class='add-tag'>+</span></span>";
+                newReceipt += "</div>";
+                receiptId++;
+                $("#receiptList").append(newReceipt);
+                $(addTag(receipt))
+            }
+        })
+    });
+
+
+    function Put(tag, id) {
+        $.ajax({
+            url: api + '/tags/' + tag,
+            type: 'PUT',
+            data: id,
+            contentType: "application/json",
+            success: function (data) {
+            }
+        });
+    }
+
+    function Post(receipt) {
+        $.ajax({
+            type: "POST",
+            url: api + "/receipts",
+            data: JSON.stringify(receipt),
+            contentType: "application/json",
+            success: function (data) {
+            }
+        });
+
+    }
+
+    $(document).ready(function(){
+        var receiptId = 1;
+
+
+        //POST a receipt
+        $("#save-receipt").click(function(){
+            var receipt = {
+                "merchant": $("#merchant").val(),
+                "amount": $("#amount").val(),
+                "tags":[]
+            }
+            if (receipt.merchant!=null) {
+                var newReceipt = "<div class='receipt' id = 'receipt'" + receiptId + "'>";
+                newReceipt += "<span class='merchant'>" + receipt.merchant+"</span>";
+                newReceipt += "<span>--></span>";
+                newReceipt += "<span class='amount'>" + receipt.amount+"</span>";
+                newReceipt += "<span>--></span>";
+                newReceipt += "<span>Tag:</span>";
+                newReceipt += "<span class='tagValue'>"+receipt.tags+"</span>";
+                newReceipt += "<input type='text' id= 'tag_input' class = 'tag_input'>";
+                newReceipt += "<button class='add-tag'>+</button>";
+                newReceipt += "</div>";
+                $("#receiptList").append(newReceipt);
+                //$(Post(receipt));
+                receiptId++;
+            }
+        });
+
+        $("#cancel-receipt").click(function () {
+            $("#merchant").val("");
+            $("#amount").val("");
+        })
+
+        $(document).on("keypress", ".tag_input", function(key){
+            if (key.which == 13) {
+                var taglist = this.previousElementSibling;
+                var newTag = $(this).val();
+                var newDiv = "<span class = 'tagValue'>" + newTag + "<span/>";
+                $(taglist).append(newDiv);
+                $(this).val("");
+                //$PUT(newTag, 0);
+            }
+
+        });
+
+        $(document).on('click','.tagValue',function(){
+            $(this).remove();
+        });
+
+        $(document).on("click", ".add-tag", function(){
+
+        });
+
+        $("#add-receipt").click(function () {
+            //here is add-receipt element!!!
+        });
+        
+    });
+
+
+</script>
 <body>
-<button id="start">Start Video</button>
-<button id="snapshot" disabled="true">Take a Snapshot!</button>
-<br>
-<div id="vidwrap">
-    <video autoplay></video>
-    </div>
-</body>
+<div>
+    My Receipts
+    <button class = "Button" id = "add-receipt">+</button>
+</div>
 
-</html>
+<div >
+    <div>
+        Merchant:<input type="text" id = "merchant" name="merchant"><br>
+    </div>
+    <div>
+        Amount:<input type="text" id = "amount" name="amount"><br>
+    </div>
+    <button class = "save-receipt" id="save-receipt">save</button>
+    <button class="cancel-receipt" id="cancel-receipt">cancel</button>
+</div>
+
+<div id = "receiptList">
+    <div>
+        <span>Merchant</span>
+        <span>Amount</span>
+        <span>Tags</span>
+    </div>
+
+</div>
+
+</body>
