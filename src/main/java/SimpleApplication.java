@@ -1,4 +1,7 @@
-import controllers.*;
+import controllers.HelloWorldController;
+import controllers.ReceiptController;
+import controllers.NetIdController;
+import controllers.TagController;
 import dao.ReceiptDao;
 import dao.TagDao;
 import io.dropwizard.Application;
@@ -9,7 +12,6 @@ import org.h2.jdbcx.JdbcConnectionPool;
 
 import org.jooq.SQLDialect;
 import org.jooq.impl.DefaultConfiguration;
-
 
 public class SimpleApplication extends Application<Configuration> {
     public static void main(String[] args) throws Exception {
@@ -44,9 +46,7 @@ public class SimpleApplication extends Application<Configuration> {
         // you need class and method @Path annotations!
         env.jersey().register(new HelloWorldController());
         env.jersey().register(new ReceiptController(receiptDao));
-        env.jersey().register(new ReceiptTagController(tagDao));
         env.jersey().register(new NetIdController());
-        env.jersey().register(new HtmlController());
+        env.jersey().register(new TagController(tagDao));
     }
 }
-

@@ -4,20 +4,14 @@
 package generated.tables;
 
 
-import generated.Keys;
 import generated.Public;
 import generated.tables.records.TagsRecord;
-
-import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.Generated;
 
 import org.jooq.Field;
-import org.jooq.Identity;
 import org.jooq.Table;
 import org.jooq.TableField;
-import org.jooq.UniqueKey;
 import org.jooq.impl.TableImpl;
 
 
@@ -34,7 +28,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tags extends TableImpl<TagsRecord> {
 
-	private static final long serialVersionUID = 1768647946;
+	private static final long serialVersionUID = 1006142987;
 
 	/**
 	 * The reference instance of <code>public.tags</code>
@@ -48,11 +42,6 @@ public class Tags extends TableImpl<TagsRecord> {
 	public Class<TagsRecord> getRecordType() {
 		return TagsRecord.class;
 	}
-
-	/**
-	 * The column <code>public.tags.tagid</code>.
-	 */
-	public final TableField<TagsRecord, Integer> TAGID = createField("tagid", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>public.tags.id</code>.
@@ -84,30 +73,6 @@ public class Tags extends TableImpl<TagsRecord> {
 
 	private Tags(String alias, Table<TagsRecord> aliased, Field<?>[] parameters) {
 		super(alias, Public.PUBLIC, aliased, parameters, "");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Identity<TagsRecord, Integer> getIdentity() {
-		return Keys.IDENTITY_TAGS;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public UniqueKey<TagsRecord> getPrimaryKey() {
-		return Keys.CONSTRAINT_2;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<UniqueKey<TagsRecord>> getKeys() {
-		return Arrays.<UniqueKey<TagsRecord>>asList(Keys.CONSTRAINT_2);
 	}
 
 	/**
